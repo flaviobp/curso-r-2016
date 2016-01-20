@@ -1,0 +1,15 @@
+---
+title: "Laboratório 2"
+author: "Curso R de verão 2016"
+date: "20 de janeiro de 2016"
+output: html_document
+---
+```{r}
+
+arq <- 'C:/Users/adm/Documents/dados/pnud.csv'
+dados <- read.csv(file = arq)
+
+dados$idhm[dados$ano==2010 & dados$municipio=="OSASCO"]
+
+```
+

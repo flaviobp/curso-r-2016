@@ -217,7 +217,7 @@ x + y
 
 #carregando o pacote
 #library(magrittr)
-#mean(mtcars$mpg)
+#mean(mtcars$mpg)=
 #mtcars$mpg%>%mean()
 
 
