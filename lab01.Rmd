@@ -1,6 +1,6 @@
 ---
 title: "Laboratório 1"
-author: "Curso R de verao 2016"
+author: "Curso R de verão 2016"
 date: "18 de janeiro de 2016"
 output: html_document
 ---
@@ -15,23 +15,18 @@ moeda <- function(p) {
   }
 }
 
-moeda(0.1)
-
 moedas <- function(n,p) {
   replicate(n, moeda(p))
 }
-
-summary(moedas(100, 0.5))
 
 proporcao <- function(resultados) {
   sum(resultados)/length(resultados)
 }
 
-
 simulacao <- function(k, n, p) {
   replicate(k, proporcao(moedas(n, p)))
 }
 
-
+hist(simulacao(200,10,0.5))
 ```
 
