@@ -39,6 +39,6 @@ simulacao <- function(k, n, p) {
 hist(simulacao(1000,10,0.5))
 hist(simulacao(1000,100,0.5))
 hist(simulacao(1000,1000,0.5))
-hist(simulacao(1000,1000,0.5))
+hist(simulacao(1000,10000,0.5))
 ```
 
