@@ -12,15 +12,23 @@ library(dplyr)
 #install.packages("openxlsx")
 library(openxlsx)
 
-dir <- 'C:/Users/Raimundo/Desktop/CURSO R/dados/pnud.'
+dir <- 'W:/dados/pnud.'
 
 pnud_csv <- 'csv'%>%paste(dir,.,sep="")%>%read.csv()
-pnud_rda <- 'RDA'%>%paste(dir,.,sep="")%>%load()
+
+'rda'%>%paste(dir,.,sep="")%>%load(.,.GlobalEnv)
+pnud_rda <- d
+
 pnud_rds <- 'rds'%>%paste(dir,.,sep="")%>%readRDS()
 pnud_sqlite <- 'sqlite'%>%paste(dir,.,sep="")%>%src_sqlite()%>%tbl(.,"pnud")%>%data.frame()
 pnud_xlsx <- 'xlsx'%>%paste(dir,.,sep="")%>%read.xlsx()
-pnud_txt <- 'txt'%>%paste(dir,.,sep="")%>%read.table()
+pnud_txt <- 'txt'%>%paste(dir,.,sep="")%>%read.table(.,header = T,stringsAsFactors = T, quote ='"')
 
+#MUNICIPIO PARA FACTOR 
+pnud_rda$municipio <- as.factor(pnud_rda$municipio)
+pnud_rds$municipio <- as.factor(pnud_rds$municipio)
+pnud_sqlite$municipio <- as.factor(pnud_sqlite$municipio)
+pnud_xlsx$municipio <- as.factor(pnud_xlsx$municipio)
 
 summary(pnud_csv[,1:10])
 summary(pnud_rda[,1:10])
@@ -29,9 +37,23 @@ summary(pnud_sqlite[,1:10])
 summary(pnud_xlsx[,1:10])
 summary(pnud_txt[,1:10])
 
-
-
 #dados$idhm[dados$ano==2010 & dados$municipio=="OSASCO"]
 
-```
 
+library(httr)
+pnud_html <- GET("https://www.dropbox.com/s/nsf3ewq9nji77cm/pnud.html?dl=1")
+
+content(pnud_html,"text") %>% read_html() %>% html_structure() %>% html_table()
+content(pnud_html,"text") %>% html_structure() %>% html_table()
+
+
+#deu certo
+phtml <- read_html("https://www.dropbox.com/s/nsf3ewq9nji77cm/pnud.html?dl=1")
+html_nodes(phtml, "table") %>% html_table()
+pnode <- html_nodes(phtml, "table") %>% html_table() %>% data.frame()
+
+
+#json
+pnud_json <- fromJSON("https://www.dropbox.com/s/whlav3pgvrp7gff/pnud.json?dl=1")
+pnud_json$municipio <- as.factor(pnud_json$municipio)
+```
