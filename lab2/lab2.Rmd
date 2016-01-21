@@ -6,10 +6,32 @@ output: html_document
 ---
 ```{r}
 
-arq <- 'C:/Users/adm/Documents/dados/pnud.csv'
-dados <- read.csv(file = arq)
+#install.packages("RSQLite")
+library(dplyr)
 
-dados$idhm[dados$ano==2010 & dados$municipio=="OSASCO"]
+#install.packages("openxlsx")
+library(openxlsx)
+
+dir <- 'C:/Users/Raimundo/Desktop/CURSO R/dados/pnud.'
+
+pnud_csv <- 'csv'%>%paste(dir,.,sep="")%>%read.csv()
+pnud_rda <- 'RDA'%>%paste(dir,.,sep="")%>%load()
+pnud_rds <- 'rds'%>%paste(dir,.,sep="")%>%readRDS()
+pnud_sqlite <- 'sqlite'%>%paste(dir,.,sep="")%>%src_sqlite()%>%tbl(.,"pnud")%>%data.frame()
+pnud_xlsx <- 'xlsx'%>%paste(dir,.,sep="")%>%read.xlsx()
+pnud_txt <- 'txt'%>%paste(dir,.,sep="")%>%read.table()
+
+
+summary(pnud_csv[,1:10])
+summary(pnud_rda[,1:10])
+summary(pnud_rds[,1:10])
+summary(pnud_sqlite[,1:10])
+summary(pnud_xlsx[,1:10])
+summary(pnud_txt[,1:10])
+
+
+
+#dados$idhm[dados$ano==2010 & dados$municipio=="OSASCO"]
 
 ```
 
