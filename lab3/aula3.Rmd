@@ -1,0 +1,295 @@
+---
+title: "Aula 3"
+author: "Curso R de verão 2016"
+date: "22 de janeiro de 2016"
+output: html_document
+---
+```{r}
+
+library(dplyr)
+
+#tbl_df - transforma data.frame em algo mais legivel, nova forma de imprimir os dados
+
+#pacote nao disponivel no cran
+#data(pnud_muni, package="abjutils")
+
+#dados no dplyr sempre data.frame
+#saida sempre é um data.frame tambe
+
+#pnud_muni %>%
+#  select(ano:municipio, starts_with('idhm'))
+# seleciona as colunas de ano ate municipio, depois selecionad todas colunas que comeca com idhm
+
+#exercicio
+#SELECT - COLUNAS
+#pnud_muni %>% select(municipio, uf, ano, gini, starts_with('idhm')) %>% .[1:6,]
+#pnud_muni %>% select(municipio, ufn, ano, gini, starts_with('idhm')) %>% .[1:6,]
+
+
+#FILTER - LINHAS
+#parecido com o subset, condicoes podem estar vetorizadas é o mesmo que separar por &
+
+
+#pnud_muni %>%
+#  select(ano, ufn, municipio, idhm) %>%
+#  filter(ufn=='São Paulo', idhm > .8, ano==2010)
+# 
+# #pnud_muni %>%
+# #    select(ano, ufn, municipio, idhm) %>%
+# #    filter(ufn=='São Paulo'& idhm > .8 & ano==2010)
+# 
+# 
+# 
+# # is.na - pergunta se é vazio NA
+# # aqui nao é vazio
+# #pnud_muni %>%
+# #  select(ano, ufn, municipio, idhm, PEA) %>%
+# #  filter(!is.na(PEA))
+# 
+# # municipio in
+# #pnud_muni %>%
+# #  select(ano, ufn, municipio, idhm) %>%
+# #  filter(municipio %in% c('CAMPINAS', 'SÃO PAULO'))
+# 
+# #Exercicio - filter
+# pnud_muni %>%
+#     select(ano, municipio, ufn, gini, starts_with('idh')) %>%
+#     filter(ano==2010 & (gini > .5 | idhm > 0.7))%>%.[1:2,]
+# 
+# 
+# 
+# #MUTATE - ADICIONAR NOVAS VARIAVEIS, MUTACAO NA BASE DE DADOS
+# # PARECIDA COM TRANSFORM
+# # RESTRICAO NOVAS VARIAVEIS MESMO TAMANHO(LENGTH) OU TAMANHO 1 QUE RECICLA
+# #NAO RECICLA COM TAMANHO 2
+# 
+# 
+# 
+# ## errado
+# # pnud_muni %>%
+# #   select(ano, ufn, municipio, starts_with('idhm')) %>%
+# #   filter(ano==2010) %>%
+# #   mutate(idhm2 = mean(c(idhm_e, idhm_l))) <--- FAZ UM NUMERO
+# 
+# ## uma alternativa (+ demorada)
+# # pnud_muni %>%
+# #   select(ano, ufn, municipio, starts_with('idhm')) %>%
+# #   filter(ano==2010) %>%
+# #   rowwise() %>% #<------ VAI FAZER A MEDIA LINHA POR LINHA 
+# #   mutate(idhm2 = mean(c(idhm_e, idhm_l)))
+# 
+# 
+# 
+# 
+# #EXERCICIO - MUTATE
+# pnud_muni %>%
+#     select(ano, municipio, ufn, gini, starts_with('idh')) %>%
+#     filter(ano==2010)%>%mutate(idhm_fmt = paste(round(idhm *100,1), '%'))%>%.[1,]
+#     
+# 
+# 
+# #ARRANGE - ORDENAR,
+#  pnud_muni %>%
+# +     select(ano, ufn, municipio, idhm) %>%
+# +     filter(ano==2010) %>%
+# +     mutate(idhm_porc = idhm * 100,
+# +            idhm_porc_txt = paste(idhm_porc, '%')) %>%
+# +     arrange(desc(idhm))%>%.[1,]
+#  
+#  
+# 
+# pnud_muni %>%
+#     select(ano, ufn, municipio, idhm) %>%
+#     filter(ano==2010) %>%
+#     mutate(idhm_porc = idhm * 100,
+#            idhm_porc_txt = paste(idhm_porc, '%')) %>%
+#     arrange(desc(idhm))%>%.[1,]
+# 
+# # primeiro ufn depois ordem decrescente
+# pnud_muni %>%
+#     select(ano, ufn, municipio, idhm) %>%
+#     filter(ano==2010) %>%
+#     mutate(idhm_porc = idhm * 100,
+#            idhm_porc_txt = paste(idhm_porc, '%')) %>%
+#     arrange(ufn, desc(idhm))%>%.[1,]
+# 
+# 
+# 
+# 
+# #EXERCICIO - ARRANGE
+# pnud_muni%>%filter(ano==2010)%>%arrange(desc(idhm))%>%.[1:10,]
+# 
+# pnud_muni%>%filter(ano==2010)%>%arrange(desc(idhm))%>% head(10)
+# 
+# 
+# 
+# #SUMMARISE - DATA.FRAME RETORNA UM OUTRO DATA.FRAME COM APENAS UMA LINHA
+# #SO A MEDIA VAR DP DAS VARIAVEIS
+# #GROUP_BY OPERACAO COM GRUPOS - CADA ESTADO MEDIA DE IDH DAQUELE ESTADO
+# #pnud_muni %>% summarise(media = mean(idhm), dp = sd(idhm))
+# #pnud_muni %>% group_by(ano) %>% summarise(media = mean(idhm), dp = sd(idhm))
+# #pnud_muni %>% group_by(ano, ufn) %>% summarise(media = mean(idhm), dp = sd(idhm))
+# 
+# 
+# #distrito federal - deu NaN - 
+# #retirar o nan  
+# #  mutate(dp = ifelse(is.nan(dp), 0, dp))
+# 
+# 
+# #operacoes em grupos - mostrar no final total de municipios por ano e tb a quantidade de estados
+# #n() - numero de linhas dentro de um grupo
+# #n_distinct(())
+# #pnud_muni %>% group_by(ano) %>% summarise(media = mean(idhm), dp = sd(idhm), #n_obs = n(), n_distinct(ufn))
+# 
+# #funcao count agrupa por uma variavel e solta n, 
+# 
+# 
+# # pnud_muni %>%
+# #   filter(ano==2010) %>% count(ufn)
+# # 
+# # é igual
+# # 
+# # pnud_muni %>%
+# #   filter(ano==2010) %>% group_by(ufn) %>% summarise(n=n())
+# 
+# 
+# 
+# #ponderada - (espvida*popt)/sum(popt)
+# 
+# pnud_muni %>%
+#   filter(ano==2000) %>%
+#   group_by(ufn) %>%
+#   summarise(media = mean(sum(espvida*popt)/sum(popt)))
+# 
+# 
+# pnud_muni %>%
+#   filter(ano==2000) %>%
+#   group_by(ufn) %>%
+#   summarise(media = mean(espvida))
+# 
+# 
+# 
+# 
+# 
+# pnud_muni %>%
+#   filter(ano==2000) %>%
+#   group_by(ufn) %>%
+# summarise(x = sum(espvida*popt)/sum(popt))
+# 
+# pnud_muni %>%
+#   filter(ano==2000) %>%
+#   group_by(ufn) %>%
+#   summarise(media = mean(sum(espvida*popt)/sum(popt))) %>% 
+#   arrange(desc(media)) %>% 
+#   print(n=100)
+# 
+# 
+# 
+# 
+# #pacote library(tidyr)
+# #Tidying - dados nao estao em formato adequado, com uma base de dados com estado e ano e espec d vida, mas os anos vem nas colunas - base long longitudinal, precisa pegar variaveis q estao nas colunas e empilhar, tambem pode pegar uma coluna e jogar nas linhas
+# 
+# 
+# 
+# 
+# #SPREAD - JOGA VARIAVEL NAS COLUNAS
+# 
+# # pnud_muni %>%
+# #   group_by(ano, ufn) %>%
+# #   summarise(populacao = sum(popt)) %>%
+# #   ungroup() %>%
+# #   
+#  ano              ufn populacao
+#    (dbl)            (chr)     (dbl)
+# 1   1991             Acre    414609
+# 2   1991          Alagoas   2448544
+# 3   1991            Amapá    280599
+# 4   1991         Amazonas   1977073
+# 5   1991            Bahia  11522516
+# 6   1991            Ceará   6255097
+# 7   1991 Distrito Federal   1551869
+# 8   1991   Espírito Santo   2562362
+# 9   1991            Goiás   3931474
+# 10  1991         Maranhão   4803825
+# ..   ...              ...       ...
+# 
+# #   
+# # QUEBRAR EM COLUNAS - SPREAD
+# # 
+# # pnud_muni %>%
+# #   group_by(ano, ufn) %>%
+# #   summarise(populacao = sum(popt)) %>%
+# #   ungroup() %>% spread(ano, populacao)
+# 
+# # espalhou em colunas
+# 
+# #            ufn     1991     2000     2010
+# #               (chr)    (dbl)    (dbl)    (dbl)
+# # 1              Acre   414609   519639   690774
+# # 2           Alagoas  2448544  2611271  3045853
+# # 3             Amapá   280599   453547   652768
+# # 4          Amazonas  1977073  2543710  3301220
+# # 5             Bahia 11522516 12286822 13755196
+# # 6             Ceará  6255097  6995427  8317603
+# # 7  Distrito Federal  1551869  2001728  2541714
+# # 8    Espírito Santo  2562362  3048681  3477471
+# # 9             Goiás  3931474  4887131  5934769
+# # 10         Maranhão  4803825  5258529  6317986
+# 
+# 
+# # FUNCAO - GATHER - EMPILHA O BANCO
+# 
+# 
+# antes
+#  pnud_muni %>%
+# +   filter(ano == 2010) %>%
+# +   select(ufn, municipio, starts_with('idhm_')) %>% tbl_df()
+# Source: local data frame [5,565 x 5]
+# 
+#         ufn             municipio idhm_e idhm_l idhm_r
+#       (chr)                 (chr)  (dbl)  (dbl)  (dbl)
+# 1  Rondônia ALTA FLORESTA D'OESTE  0.526  0.763  0.657
+# 2  Rondônia             ARIQUEMES  0.600  0.806  0.716
+# 3  Rondônia                CABIXI  0.559  0.757  0.650
+# 4  Rondônia                CACOAL  0.620  0.821  0.727
+# 5  Rondônia            CEREJEIRAS  0.602  0.799  0.688
+# 6  Rondônia     COLORADO DO OESTE  0.584  0.814  0.676
+# 7  Rondônia            CORUMBIARA  0.473  0.774  0.630
+# 8  Rondônia         COSTA MARQUES  0.493  0.751  0.616
+# 9  Rondônia       ESPIGÃO D'OESTE  0.536  0.819  0.691
+# 10 Rondônia         GUAJARÁ-MIRIM  0.519  0.823  0.663
+# 
+# 
+# 
+# > pnud_muni %>%
+# +   filter(ano == 2010) %>%
+# +   select(ufn, municipio, starts_with('idhm_')) %>%
+# +   gather(tipo_idh, idh, starts_with('idhm_')) %>% tbl_df()
+# 
+# #criou coluna tipo 
+# 
+#        ufn             municipio tipo_idh   idh
+#       (chr)                 (chr)   (fctr) (dbl)
+# 1  Rondônia ALTA FLORESTA D'OESTE   idhm_e 0.526
+# 2  Rondônia             ARIQUEMES   idhm_e 0.600
+# 3  Rondônia                CABIXI   idhm_e 0.559
+# 4  Rondônia                CACOAL   idhm_e 0.620
+# 5  Rondônia            CEREJEIRAS   idhm_e 0.602
+# 6  Rondônia     COLORADO DO OESTE   idhm_e 0.584
+# 7  Rondônia            CORUMBIARA   idhm_e 0.473
+# 8  Rondônia         COSTA MARQUES   idhm_e 0.493
+# 9  Rondônia       ESPIGÃO D'OESTE   idhm_e 0.536
+# 10 Rondônia         GUAJARÁ-MIRIM   idhm_e 0.519
+# 
+# 
+# 
+# 
+# gather e spread - sao operacoes inversar
+
+#generaliza as outras, fazer algo
+#Para realizar operações mais gerais, usar do.
+
+install.packages("nycfligths13")
+
+
+

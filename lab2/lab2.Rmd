@@ -72,12 +72,15 @@ download.file(link_pnud, tmp, quiet = TRUE)
 pnud <- readRDS(tmp)
 file.remove(tmp)
 
-pnud <- readRDS('C:/Users/Raimundo/Desktop/CURSO R/pnud_simplificado.rds')
+#C:/Users/adm/Documents/dados/pnud_simplificado.rds
+#C:/Users/Raimundo/Desktop/CURSO R/pnud_simplificado.rds
+pnud <- readRDS('C:/Users/adm/Documents/dados/pnud_simplificado.rds')
 
 str(pnud)
 
 #Quais são os seis municípios com os maiores IDH municipais em 2010.
-pnud[pnud$ano==2010,]%>%.[pnud2010$idhm%>%order(.,decreasing = T),]%>%.[1:6,]
+pnud2010 <- pnud[pnud$ano==2010,]
+pnud2010[pnud2010$idhm%>%order(.,decreasing = T),]%>%.[1:6,]
 
 #Qual é a unidade federativa com menor expectativa de vida média, ponderada pela população dos municípios em 2000
 subconjunto <- subset(pnud[pnud$ano==2000,], select=c("ufn","espvida","pesotot"))
@@ -110,5 +113,13 @@ aggregate(catpnud$espvida,list(catrdpc=catpnud$catrdpc),mean)
 hist(catpnud$espvida[catpnud$catrdpc=='ALTA'])
 hist(catpnud$espvida[catpnud$catrdpc=='MÉDIA'])
 hist(catpnud$espvida[catpnud$catrdpc=='BAIXA'])
+
+#No nordeste o aumento de distribuição de renda foi maior do que no sudeste
+nordeste <- unique(pnud$ufn)[8:16]
+sudeste <-  unique(pnud$ufn)[17:20]
+
+nordeste <- c("","","")
+
+#Insira mais pelo menos 3 estudos que você ache interessante.
 ```
 
