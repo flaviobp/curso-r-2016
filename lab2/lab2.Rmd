@@ -4,56 +4,111 @@ author: "Curso R de verão 2016"
 date: "20 de janeiro de 2016"
 output: html_document
 ---
+#Parte 1: Leitura de dados
 ```{r}
-
-#install.packages("RSQLite")
-library(dplyr)
-
-#install.packages("openxlsx")
+#PACOTES
+# install.packages("RSQLite")
+# install.packages("openxlsx")
 library(openxlsx)
+library(dplyr)
+library(magrittr)
+library(httr)
+library(rvest)
+library(jsonlite)
 
-dir <- 'W:/dados/pnud.'
+#CONSTANTES
+dir <- 'C:/Users/Raimundo/Desktop/CURSO R/dados'
 
-pnud_csv <- 'csv'%>%paste(dir,.,sep="")%>%read.csv()
+#FUNCOES
+filePath <- function(ext) {
+  return(ext%>%paste(dir,'/pnud.',.,sep=""))
+}
 
-'rda'%>%paste(dir,.,sep="")%>%load(.,.GlobalEnv)
+#CARREGAR ARQUIVOS
+pnud_csv <- 'csv'%>%filePath()%>%read.csv()
+
+'rda'%>%filePath()%>%load(.,.GlobalEnv) 
 pnud_rda <- d
 
-pnud_rds <- 'rds'%>%paste(dir,.,sep="")%>%readRDS()
-pnud_sqlite <- 'sqlite'%>%paste(dir,.,sep="")%>%src_sqlite()%>%tbl(.,"pnud")%>%data.frame()
-pnud_xlsx <- 'xlsx'%>%paste(dir,.,sep="")%>%read.xlsx()
-pnud_txt <- 'txt'%>%paste(dir,.,sep="")%>%read.table(.,header = T,stringsAsFactors = T, quote ='"')
+pnud_rds <- 'rds'%>%filePath()%>%readRDS()
+
+pnud_sqlite <- 'sqlite'%>%filePath()%>%src_sqlite()%>%tbl(.,"pnud")%>%data.frame()
+
+pnud_xlsx <- 'xlsx'%>%filePath()%>%read.xlsx()
+
+pnud_txt <- 'txt'%>%filePath()%>%read.table(.,header = T,stringsAsFactors = T, quote ='"')
+
+pnud_html <- read_html("https://www.dropbox.com/s/nsf3ewq9nji77cm/pnud.html?dl=1")%>%html_nodes(., "table") %>% html_table()%>% data.frame()
+
+pnud_json <- fromJSON("https://www.dropbox.com/s/whlav3pgvrp7gff/pnud.json?dl=1")
 
 #MUNICIPIO PARA FACTOR 
+pnud_csv$municipio <- as.factor(pnud_csv$municipio)
 pnud_rda$municipio <- as.factor(pnud_rda$municipio)
 pnud_rds$municipio <- as.factor(pnud_rds$municipio)
 pnud_sqlite$municipio <- as.factor(pnud_sqlite$municipio)
 pnud_xlsx$municipio <- as.factor(pnud_xlsx$municipio)
+pnud_txt$municipio <- as.factor(pnud_txt$municipio)
+pnud_html$municipio <- as.factor(pnud_html$municipio)
+pnud_json$municipio <- as.factor(pnud_json$municipio)
 
+#SUMMARY DAS 10 PRIMEIRAS COLUNAS
 summary(pnud_csv[,1:10])
 summary(pnud_rda[,1:10])
 summary(pnud_rds[,1:10])
 summary(pnud_sqlite[,1:10])
 summary(pnud_xlsx[,1:10])
 summary(pnud_txt[,1:10])
-
-#dados$idhm[dados$ano==2010 & dados$municipio=="OSASCO"]
-
-
-library(httr)
-pnud_html <- GET("https://www.dropbox.com/s/nsf3ewq9nji77cm/pnud.html?dl=1")
-
-content(pnud_html,"text") %>% read_html() %>% html_structure() %>% html_table()
-content(pnud_html,"text") %>% html_structure() %>% html_table()
-
-
-#deu certo
-phtml <- read_html("https://www.dropbox.com/s/nsf3ewq9nji77cm/pnud.html?dl=1")
-html_nodes(phtml, "table") %>% html_table()
-pnode <- html_nodes(phtml, "table") %>% html_table() %>% data.frame()
-
-
-#json
-pnud_json <- fromJSON("https://www.dropbox.com/s/whlav3pgvrp7gff/pnud.json?dl=1")
-pnud_json$municipio <- as.factor(pnud_json$municipio)
+summary(pnud_html[,1:10])
+summary(pnud_json[,1:10])
 ```
+#Parte 2: descritiva básica
+```{r}
+#dados$idhm[dados$ano==2010 & dados$municipio=="OSASCO"]
+#Versão simplificada pnud
+link_pnud <- 'https://www.dropbox.com/s/seqctcl46qeemgu/pnud_simplificado.rds?dl=1'
+tmp <- tempfile()
+download.file(link_pnud, tmp, quiet = TRUE)
+pnud <- readRDS(tmp)
+file.remove(tmp)
+
+pnud <- readRDS('C:/Users/Raimundo/Desktop/CURSO R/pnud_simplificado.rds')
+
+str(pnud)
+
+#Quais são os seis municípios com os maiores IDH municipais em 2010.
+pnud[pnud$ano==2010,]%>%.[pnud2010$idhm%>%order(.,decreasing = T),]%>%.[1:6,]
+
+#Qual é a unidade federativa com menor expectativa de vida média, ponderada pela população dos municípios em 2000
+subconjunto <- subset(pnud[pnud$ano==2000,], select=c("ufn","espvida","pesotot"))
+subconjunto$ufn <- as.factor(subconjunto$ufn)
+agregacao <- aggregate(subconjunto[,2:3], list(ufn=subconjunto$ufn), sum)
+agregacao$medpon <- (agregacao$espvida*agregacao$pesotot)/sum(agregacao$pesotot)
+agregacao[agregacao$medpon%>%order(),]%>%.[1,]
+
+#Quais são os municípios outliers com relação ao índice de Gini em 1991 e em 2010 (Dica: utilize como critério para determinar outliers valores maiores que a média mais duas vezes o desvio padrão).
+outliersMun <-function(ano){
+  mun  <- pnud[pnud$ano==ano,]
+  mgini <- mean(mun$gini)
+  sdgini <- sd(mun$gini) 
+  mun[(mun$gini > (mgini+(2*sdgini))) | (mun$gini < (mgini-(2*sdgini))),]
+}
+
+outliersMun(1991)
+outliersMun(2010)
+
+
+#Categorize a renda per capita e associe com a expectativa de vida.
+str(pnud)
+catpnud <- pnud[pnud$ano==2010,]
+catpnud$catrdpc[catpnud$rdpc > 1000] <- 'ALTA'
+catpnud$catrdpc[catpnud$rdpc > 500 & catpnud$rdpc < 1000] <- 'MÉDIA'
+catpnud$catrdpc[catpnud$rdpc < 500] <- 'BAIXA'
+
+table(catpnud$catrdpc)
+aggregate(catpnud$espvida,list(catrdpc=catpnud$catrdpc),mean)
+hist(catpnud$espvida[catpnud$catrdpc=='ALTA'])
+hist(catpnud$espvida[catpnud$catrdpc=='MÉDIA'])
+hist(catpnud$espvida[catpnud$catrdpc=='BAIXA'])
+```
+
