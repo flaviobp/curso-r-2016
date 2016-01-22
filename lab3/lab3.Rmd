@@ -4,7 +4,45 @@ author: "Curso R de verão 2016"
 date: "22 de janeiro de 2016"
 output: html_document
 ---
+#Questões iniciais - Sobre dplyr e tidyr
 ```{r}
+install.packages("nycflights13")
+library(nycflights13)
+library(dplyr)
+
+flights %>% tbl_df
+?flights
+
+
+#filter
+#Atribua a uma tabela apenas os voos de janeiro de 2013.
+vjan2013 <- flights %>% filter(year == 2013 & month == 1) %>% tbl_df()
+
+#Atribua a uma tabela apenas os voos de janeiro ou fevereiro de 2013.
+vjanfev2013 <- flights %>% filter(year == 2013 & (month %in% c(1,2))) %>% tbl_df()
+
+#Atribua a uma tabela apenas os vôos com distância maior do que 1000 milhas.
+vmilhas1000 <- flights %>% filter(distance > 1000) %>% tbl_df()
+
+
+#select
+#Atribua a uma tabela apenas as colunas month e dep_delay.
+vmes_tempo <- flights %>% select(month, dep_delay)
+
+#Atribua a uma tabela apenas as colunas month e dep_delay, os nomes dessas colunas devem ser mese atraso.
+vmes_tempo_fmt <- flights %>% select(mese = month, atraso = dep_delay)
+
+#Retire da tabela as colunas tailnum, origin e dest
+vfmt <- flights %>% select(-tailnum, -origin, -dest)
+
+#mutate
+#Calcule as colunas ganho_de_tempo que é dado por dep_delay - arr_delay e velocidade dada por distance / air_time * 60.
+flights %>% mutate(ganho_de_tempo = dep_delay - arr_delay, velocidade = distance / (air_time * 60)) %>% select( ganho_de_tempo, velocidade)
+
+#Calcule o horário de chegada considerando as colunas hour, minute e air_time. A tabela deve conter duas colunas novas: hour2 com a hora de chegada e minute2 com o minuto de chegada.
+
+
+flights %>% mutate(minH = hour*60, min_ini = minH + minute, min_fin = min_ini + air_time, h_fin = air_time)
 
 ```
 

@@ -282,14 +282,14 @@ library(dplyr)
 # 10 Rondônia         GUAJARÁ-MIRIM   idhm_e 0.519
 # 
 # 
-# 
-# 
+# # 
 # gather e spread - sao operacoes inversar
 
 #generaliza as outras, fazer algo
 #Para realizar operações mais gerais, usar do.
 
-install.packages("nycfligths13")
+install.packages("nycflights13")
+library(nycflights13)
 
 
 
