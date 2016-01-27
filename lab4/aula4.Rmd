@@ -1,0 +1,285 @@
+---
+title: "Aula 4"
+author: "Curso R de Verão 2016"
+date: "27 de janeiro de 2016"
+output: html_document
+---
+```{r}
+#install.packages("ggplot2")
+#graficos - aspectos, dados e transformacoes estatisticas
+#
+#library(ggplot2)
+# Estrutura
+# Dados - data()
+# Aspectos estéticos (mapping) - aes()
+# Formas geometricas - geom_()
+# Transformacoes estatisticas - stat 
+
+# geom_point() - mapeado para pontos
+# ggplot(data = mtcars, aes(x = disp, y = mpg)) + geom_point()
+
+#outra forma
+# ggplot(data = mtcars)+
+#   geom_point(aes(x = disp, y = mpg))
+
+# as.character(am) - nesta situacao ele transformou dados continuos em discretos nas cores, caso contrario seria diferente
+
+
+# ggplot(data = mtcars) +
+#   geom_point(aes(x = disp, y = mpg, color = as.character(am)))
+
+
+#aqui aumentar a estetica com pontos para o cilindros
+#ja fica complicado, com mais de 3 aspectos no grafico
+# ggplot(data = mtcars) +
+#    geom_point(aes(x = disp, y = mpg, color = as.character(am), size = cyl))
+
+
+#mudando fixando fora do geom_point
+ # ggplot(data = mtcars) +
+ #    geom_point(aes(x = disp, y = mpg), colour = "blue", size = 5, shape = 2)
+
+#box-plot - nao tem a quantidade n
+#fill = as.character(gear) preenchimento
+  # ggplot(data = mtcars) +
+  #    geom_boxplot(aes(x = as.character(gear), y = mpg, fill = as.character(gear)))
+
+#Line
+#base de uso head(economics)
+#ggplot(economics, aes(date, unemploy)) + geom_line()
+
+
+#Hist dos precos dos diamantes
+head(diamonds)
+
+#mapeando o preco na caracteristica y e a transformacao
+ggplot(diamonds, aes(x = price)) + geom_histogram(colour = "blue", fill="black")
+
+# dispersao dos precos vs o peso
+#covariancia
+cor(diamonds$price, diamonds$carat)
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+  geom_point()
+
+#mapeando mais uma variavel para um aspecto estetico - color = cut
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+  geom_point(alpha = 0.1, aes(colour = cut))
+
+#facet_wrap(~cut) - camadas
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+  geom_point(alpha = 0.1, aes(colour = cut)) +
+  facet_wrap(~cut) 
+
+#ponto preto atras com outras cores, camadas que 
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+  geom_point(size = 2, alpha = 0.1) +  
+  geom_point(aes(colour = cut)) +
+  facet_wrap(~cut) 
+
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+  geom_point(aes(colour = cut)) +
+  geom_point(size = 2, alpha = 0.1) +    
+  facet_wrap(~cut) 
+
+
+ggplot(data = diamonds, aes(x = carat, y = price)) +
+  geom_point(aes(colour = cut)) +
+  geom_point(size = 2, alpha = 0.1) +    
+  facet_wrap(~cut) +
+  labs(x = "Peso (Quilates)", y = "Preço (U$)", colour = "Corte")
+
+
+
+#Plotar tx de desemprego e tempo de duracao do desemprego cada um em uma 
+#Os valores devem ser padronizados
+
+view(economics)
+
+#desemprego
+ggplot(economics, aes(x = date, y = unemploy)) + geom_line()
+#tempo de desemprego
+ggplot(economics, aes(x = date, y = uempmed)) + geom_line()
+
+
+#modo correto colocar as duas variaveis na mesma escala e comparar
+
+#modo 1 - para padronizar
+#dplyr para padronizar
+economics %>%
+  mutate(
+         unemploy = (unemploy - min(unemploy))/(max(unemploy) - min(unemploy)),
+         uempmed =  (uempmed - min(uempmed))/(max(uempmed) - min(uempmed))
+         ) %>%
+  ggplot(aes(date, unemploy))+
+  geom_line() +
+  geom_line(aes(y = uempmed), colour = "blue")
+
+
+
+
+#deixar no formato long - parecido com par e valor
+#fez juncao entre duas bases padronizadas com valores entre 0 e 1 
+library(tidyr)
+economics %>%
+  select(date, unemploy, uempmed) %>%
+  gather(indice, valor, -date) %>%
+  group_by(indice) %>%
+  mutate(valor_pad = (valor - min(valor))/(max(valor) - min(valor))) %>%
+  ggplot(aes(x = date, y = valor_pad, colour = indice)) +
+  geom_line() +
+  scale_colour_manual("Indice",values = c("red", "blue"), 
+                      labels = c("Desemprego", "Tempo Desemprego")) +
+  labs(x = "Data", y = "Valor")
+  
+
+
+
+
+
+#Colocar uma reta de regressao em um grafico de dispersao
+ggplot(data = diamonds %>% sample_n(10000), aes(x = carat, y = price)) +
+  geom_point()
+
+
+# (Intercept)       carat 
+#   -2256.361    7756.426 
+
+#regressao tecnica estatisca - encontrar reta dois parametros
+#reta que miniza a distancia entre os pontos
+coef(lm(price ~ carat, data = diamonds))
+
+#q cada 1 kilate o diamante custa 7 mil $ a mais
+# 
+
+#adicionando a regressao(geom_abline)
+ggplot(data = diamonds %>% sample_n(10000), aes(x = carat, y = price)) +
+geom_point() +
+geom_abline( intercept =  -2256.361, slope = 7756.426, color = "blue", linetype = "dashed", size = 5)
+
+
+
+
+#smooth - suavizar
+ggplot(data = diamonds %>% sample_n(10000), aes(x = carat, y = price)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+geom_abline( intercept =  -2256.361, slope = 7756.426, color = "blue", linetype = "dashed", size = 5)  
+
+
+# da o intervalo de confianca para os pontos a espesura da reta, alem da regressao, com a lm
+ggplot(data = diamonds %>% sample_n(100), aes(x = carat, y = price)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+
+# retirar o intervalo de confianca
+ggplot(data = diamonds %>% sample_n(100), aes(x = carat, y = price, color = cut)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = F)
+
+
+
+#lm - linear model
+ggplot(data = diamonds %>% sample_n(10000), aes(x = carat, y = price, color = cut)) +
+  geom_point() +
+  geom_smooth(se = F, method = "lm") +
+  facet_wrap(~cut) facet_wrap(~cut) 
+
+
+ggplot(data = diamonds %>% sample_n(10000), aes(x = carat, y = price, color = cut)) +
+  geom_point() +
+  geom_smooth(se = F, method = "lm") + facet_wrap(~cut) +
+  geom_abline( intercept =  -2256.361, slope = 7756.426, color = "blue", linetype = "dashed", size = 5)  
+
+
+
+
+
+#GRAFICO DE BARRAS : QTD DE VEICULOS POR CLASSE
+#qtd de diamantes premium, 
+
+table(diamonds$cut)
+#ou
+diamonds %>%
+    group_by(cut) %>%
+    summarise(n())
+
+ggplot(diamonds, aes(x = cut)) +geom_bar()
+
+#geom_bar(stat = "identity" - fazer padronizacao
+diamonds %>%
+    group_by(cut) %>%
+    summarise(n = n()) %>%
+    ggplot(aes(x = cut, y = n)) + geom_bar(stat = "identity")
+
+#coord polares
+diamonds %>%
+    group_by(cut) %>%
+    summarise(n = n()) %>%
+    mutate(perc = n/sum(n)) %>%
+    ggplot(aes(x = cut, y = perc, fill = cut)) + 
+    geom_bar(stat = "identity", position = "stack") +
+    coord_polar()
+
+#modo stack - pilha    
+diamonds %>%
+    group_by(cut) %>%
+    summarise(n = n()) %>%
+    mutate(perc = n/sum(n)) %>%
+    ggplot(aes(x = 1, y = perc, fill = cut)) + 
+    geom_bar(stat = "identity", position = "stack") +
+    coord_polar()  
+
+
+diamonds %>%
+    group_by(cut) %>%
+    summarise(n = n()) %>%
+    mutate(perc = n/sum(n)) %>%
+    ggplot(aes(x = 1, y = perc, fill = cut)) + 
+    geom_bar(stat = "identity", position = "fill") +
+    coord_polar()  
+
+
+
+
+
+
+
+
+
+
+
+
+
+install.packages("quakes")
+
+
+
+
+
+
+
+quakes  %>%
+    ggplot(aes(x=long, y=lat)) +
+    geom_density2d(aes(size=stations)) +
+    geom_map(aes(map_id=region), map=mapa, data=mapa))
+    
+    
+    
+    
+    
+    
+    ggplot(aes(x = 1m y =perc, fill = cut ))+
+      geom_bar(stat = "identity", position = "stack") +
+      coord_polar(theta = "y")
+
+
+
+
+
+
+
+
+
+
+```
+
