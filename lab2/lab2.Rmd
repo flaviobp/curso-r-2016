@@ -64,8 +64,8 @@ summary(pnud_json[,1:10])
 ```
 #Parte 2: descritiva básica
 ```{r}
-#dados$idhm[dados$ano==2010 & dados$municipio=="OSASCO"]
 #Versão simplificada pnud
+#nao funcinou este treco
 link_pnud <- 'https://www.dropbox.com/s/seqctcl46qeemgu/pnud_simplificado.rds?dl=1'
 tmp <- tempfile()
 download.file(link_pnud, tmp, quiet = TRUE)
@@ -74,7 +74,7 @@ file.remove(tmp)
 
 #C:/Users/adm/Documents/dados/pnud_simplificado.rds
 #C:/Users/Raimundo/Desktop/CURSO R/pnud_simplificado.rds
-pnud <- readRDS('C:/Users/adm/Documents/dados/pnud_simplificado.rds')
+pnud <- readRDS('C:/Users/Raimundo/Desktop/CURSO R/pnud_simplificado.rds')
 
 str(pnud)
 
@@ -85,8 +85,9 @@ pnud2010[pnud2010$idhm%>%order(.,decreasing = T),]%>%.[1:6,]
 #Qual é a unidade federativa com menor expectativa de vida média, ponderada pela população dos municípios em 2000
 subconjunto <- subset(pnud[pnud$ano==2000,], select=c("ufn","espvida","pesotot"))
 subconjunto$ufn <- as.factor(subconjunto$ufn)
-agregacao <- aggregate(subconjunto[,2:3], list(ufn=subconjunto$ufn), sum)
-agregacao$medpon <- (agregacao$espvida*agregacao$pesotot)/sum(agregacao$pesotot)
+subconjunto$esppop <- subconjunto$espvida*subconjunto$pesotot
+agregacao <- aggregate(subconjunto[,2:4], list(ufn=subconjunto$ufn), sum)
+agregacao$medpon <- (agregacao$esppop)/agregacao$pesotot
 agregacao[agregacao$medpon%>%order(),]%>%.[1,]
 
 #Quais são os municípios outliers com relação ao índice de Gini em 1991 e em 2010 (Dica: utilize como critério para determinar outliers valores maiores que a média mais duas vezes o desvio padrão).
@@ -114,12 +115,63 @@ hist(catpnud$espvida[catpnud$catrdpc=='ALTA'])
 hist(catpnud$espvida[catpnud$catrdpc=='MÉDIA'])
 hist(catpnud$espvida[catpnud$catrdpc=='BAIXA'])
 
+
 #No nordeste o aumento de distribuição de renda foi maior do que no sudeste
 nordeste <- unique(pnud$ufn)[8:16]
 sudeste <-  unique(pnud$ufn)[17:20]
 
-nordeste <- c("","","")
+pnud_nordeste <- subset(pnud, ufn %in% nordeste, select=c("ano","rdpc","pesotot"))
+pnud_sudeste <- subset(pnud, ufn %in% sudeste,select=c("ano","rdpc","pesotot"))
+
+#agregacao por ano de cada regiao com a media de distribuicao de renda
+anordpc_nordeste <- aggregate(pnud_nordeste$rdpc,list(ano = pnud_nordeste$ano),mean)
+anordpc_sudeste <- aggregate(pnud_sudeste$rdpc,list(ano = pnud_sudeste$ano), mean)
+
+#taxa de crescimento nordeste
+for(i in 1:nrow(anordpc_nordeste)){
+  if (i == 1) {
+    anordpc_nordeste[1,'growth']<- NA
+  } else {
+    anordpc_nordeste[i,'growth']<- anordpc_nordeste[i,]$x/anordpc_nordeste[i-1,]$x
+  }
+}
+
+#taxa de crescimento sudeste
+for(i in 1:nrow(anordpc_sudeste)){
+  if (i == 1) {
+    anordpc_sudeste[1,'growth']<- NA
+  } else {
+    anordpc_sudeste[i,'growth']<- anordpc_sudeste[i,]$x/anordpc_sudeste[i-1,]$x
+  }
+}
+
+#maior taxa de crescimento do nordeste
+cbind(ano = anordpc_sudeste$ano, tx_sudeste = anordpc_sudeste$growth, tx_nordeste = anordpc_nordeste$growth)
+
+
+
+
 
 #Insira mais pelo menos 3 estudos que você ache interessante.
+catrenda2010 <- pnud[pnud$ano==2010,]
+catrenda2010$catrdpc[catrenda2010$rdpc > 1000] <- 'ALTA'
+catrenda2010$catrdpc[catrenda2010$rdpc > 500 & catrenda2010$rdpc < 1000] <- 'MÉDIA'
+catrenda2010$catrdpc[catrenda2010$rdpc < 500] <- 'BAIXA'
+
+#categorizar a renda e associar com a taxa de analfabetismo em 2010
+aggregate(catrenda2010$t_analf15m,list(catrdpc=catrenda2010$catrdpc),mean)
+hist(catrenda2010$t_analf15m[catrenda2010$catrdpc=='ALTA'])
+hist(catrenda2010$t_analf15m[catrenda2010$catrdpc=='MÉDIA'])
+hist(catrenda2010$t_analf15m[catrenda2010$catrdpc=='BAIXA'])
+
+#categorizar a renda e associar com a taxa de mortalidade infantil em 2010
+aggregate(catrenda2010$mort1,list(catrdpc=catrenda2010$catrdpc),mean)
+hist(catrenda2010$mort1[catrenda2010$catrdpc=='ALTA'])
+hist(catrenda2010$mort1[catrenda2010$catrdpc=='MÉDIA'])
+hist(catrenda2010$mort1[catrenda2010$catrdpc=='BAIXA'])
+
+#A diferença entre o maior e o menor municipio de renda per capita em 2010
+max(pnud[pnud$ano==2010,]$rdpc) - min(pnud[pnud$ano==2010,]$rdpc)
+
 ```
 
