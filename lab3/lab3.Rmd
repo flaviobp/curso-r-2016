@@ -15,90 +15,178 @@ flights %>% tbl_df
 
 
 #filter
-#Atribua a uma tabela apenas os voos de janeiro de 2013.
-vjan2013 <- flights %>% filter(year == 2013 & month == 1) %>% tbl_df()
+#Atribua a uma tabela apenas os voos de 
+janeiro de 2013.
+vjan2013 <- flights %>% filter(year == 2013 
+& month == 1) %>% tbl_df()
 
-#Atribua a uma tabela apenas os voos de janeiro ou fevereiro de 2013.
-vjanfev2013 <- flights %>% filter(year == 2013 & (month %in% c(1,2))) %>% tbl_df()
+#Atribua a uma tabela apenas os voos de 
+janeiro ou fevereiro de 2013.
+vjanfev2013 <- flights %>% filter(year == 
+2013 & (month %in% c(1,2))) %>% tbl_df()
 
-#Atribua a uma tabela apenas os vôos com distância maior do que 1000 milhas.
-vmilhas1000 <- flights %>% filter(distance > 1000) %>% tbl_df()
+#Atribua a uma tabela apenas os vôos com 
+distância maior do que 1000 milhas.
+vmilhas1000 <- flights %>% filter(distance > 
+1000) %>% tbl_df()
 
 
 #select
-#Atribua a uma tabela apenas as colunas month e dep_delay.
-vmes_tempo <- flights %>% select(month, dep_delay)
+#Atribua a uma tabela apenas as colunas 
+month e dep_delay.
+vmes_tempo <- flights %>% select(month, 
+dep_delay)
 
-#Atribua a uma tabela apenas as colunas month e dep_delay, os nomes dessas colunas devem ser mese atraso.
-vmes_tempo_fmt <- flights %>% select(mese = month, atraso = dep_delay)
+#Atribua a uma tabela apenas as colunas 
+month e dep_delay, os nomes dessas colunas 
+devem ser mese atraso.
+vmes_tempo_fmt <- flights %>% select(mese = 
+month, atraso = dep_delay)
 
-#Retire da tabela as colunas tailnum, origin e dest
-vfmt <- flights %>% select(-tailnum, -origin, -dest)
+#Retire da tabela as colunas tailnum, origin 
+e dest
+vfmt <- flights %>% select(-tailnum, -
+origin, -dest)
 
 #mutate
-#Calcule as colunas ganho_de_tempo que é dado por dep_delay - arr_delay e velocidade dada por distance / air_time * 60.
-flights %>% mutate(ganho_de_tempo = dep_delay - arr_delay, velocidade = distance / (air_time * 60)) %>% select( ganho_de_tempo, velocidade)
+#Calcule as colunas ganho_de_tempo que é 
+dado por dep_delay - arr_delay e velocidade 
+dada por distance / air_time * 60.
+flights %>% mutate(ganho_de_tempo = 
+dep_delay - arr_delay, velocidade = distance 
+/ (air_time * 60)) %>% select( 
+ganho_de_tempo, velocidade)
 
-#Calcule o horário de chegada considerando as colunas hour, minute e air_time. A tabela deve conter duas colunas novas: hour2 com a hora de chegada e minute2 com o minuto de chegada.
+#Calcule o horário de chegada considerando 
+as colunas hour, minute e air_time. A tabela 
+deve conter duas colunas novas: hour2 com a 
+hora de chegada e minute2 com o minuto de 
+chegada.
 flights %>% 
-  mutate(hour2 = hour + (air_time%/%60) + ((minute + (air_time%%60))%/%60), minute2 = (minute + (air_time%%60))%%60) %>%
-  mutate(hour2 = ifelse(hour2 > 23, hour2%%24, hour2)) %>%
-  select(air_time, hour, minute, hour2, minute2)
+  mutate(hour2 = hour + (air_time%/%60) + 
+((minute + (air_time%%60))%/%60), minute2 = 
+(minute + (air_time%%60))%%60) %>%
+  mutate(hour2 = ifelse(hour2 > 23, hour2%
+%24, hour2)) %>%
+  select(air_time, hour, minute, hour2, 
+minute2)
 
 
 # flights %>% 
-#   mutate(hour_air = air_time%/%60, minute_air = air_time%%60, hour2 = hour + hour_air + ((minute + minute_air)%/%60), minute2 = (minute + minute_air)%%60) %>%
-#   mutate(hour2 = ifelse(hour2 > 23, hour2%%24, hour2)) %>%
-#   select(air_time, hour, minute, hour_air, minute_air, hour2, minute2)
+#   mutate(hour_air = air_time%/%60, 
+minute_air = air_time%%60, hour2 = hour + 
+hour_air + ((minute + minute_air)%/%60), 
+minute2 = (minute + minute_air)%%60) %>%
+#   mutate(hour2 = ifelse(hour2 > 23, 
+hour2%%24, hour2)) %>%
+#   select(air_time, hour, minute, hour_air, 
+minute_air, hour2, minute2)
 
 
-# air_time  hour minute hour_air minute_air hour2 minute2
-#       (dbl) (dbl)  (dbl)    (dbl)      (dbl) (dbl)   (dbl)
-# 1       227     5     17        3         47     9       4
-# 2       227     5     33        3         47     9      20
-# 3       160     5     42        2         40     8      22
-# 4       183     5     44        3          3     8      47
-# 5       116     5     54        1         56     7      50
-# 6       150     5     54        2         30     8      24
-# 7       158     5     55        2         38     8      33
-# 8        53     5     57        0         53     6      50
-# 9       140     5     57        2         20     8      17
-# 10      138     5     58        2         18     8      16
+# air_time  hour minute hour_air minute_air 
+hour2 minute2
+#       (dbl) (dbl)  (dbl)    (dbl)      
+(dbl) (dbl)   (dbl)
+# 1       227     5     17        3         
+47     9       4
+# 2       227     5     33        3         
+47     9      20
+# 3       160     5     42        2         
+40     8      22
+# 4       183     5     44        3          
+3     8      47
+# 5       116     5     54        1         
+56     7      50
+# 6       150     5     54        2         
+30     8      24
+# 7       158     5     55        2         
+38     8      33
+# 8        53     5     57        0         
+53     6      50
+# 9       140     5     57        2         
+20     8      17
+# 10      138     5     58        2         
+18     8      16
 
 
 
 
 #summarise
-#Calcule a média da distância de todos os vôos.
+#Calcule a média da distância de todos os 
+vôos.
 flights %>%
   summarise(media = mean(distance))
 
-#Calcule a média da distância dos vôos por mês
+#Calcule a média da distância dos vôos por 
+mês
 flights %>%
   group_by(month) %>%
   summarise(media = mean(distance))
 
-#Calcule a média, mediana, primeiro quartil e terceiro quartil do tempo de viagem por mês.
+#Calcule a média, mediana, primeiro quartil 
+e terceiro quartil do tempo de viagem por 
+mês.
 flights %>%
-  mutate(air_time=ifelse(is.na(air_time),0,air_time)) %>%
+  mutate(air_time=ifelse(is.na
+(air_time),0,air_time)) %>%
   group_by(month) %>%
-  summarise(media = mean(air_time), mediana = median(air_time), quart1st = quantile(air_time, c(0.25)), quart3st = quantile(air_time, c(0.75)))
+  summarise(media = mean(air_time), mediana 
+= median(air_time), quart1st = quantile
+(air_time, c(0.25)), quart3st = quantile
+(air_time, c(0.75)))
 
 
 
 #arrange
-#Ordene a base de dados pelo atraso na partida em ordem crescente.
+#Ordene a base de dados pelo atraso na 
+partida em ordem crescente.
 flights %>%
   arrange(dep_delay)
 
-#Repita a questão anterior, porém na ordem decrescente.
+#Repita a questão anterior, porém na ordem 
+decrescente.
+flights %>%arrange(desc(dep_delay))
+
+
+library(tidyr)
+#spread
+#Crie uma tabela em que cada linha é um dia 
+e cada coluna é o atraso médio de partida 
+por mês.
+
 flights %>%
-  arrange(desc(dep_delay))
+  group_by(month, day) %>%
+  summarise(atraso_med = mean
+(dep_delay,na.rm=T)) %>%
+  ungroup() %>% spread(month, atraso_med)
+
+#Repita a mesma operação, mas dessa vez cada coluna será uma hora do dia.
+flights %>%
+  group_by(hour, day) %>%
+  summarise(atraso_med = mean
+(dep_delay,na.rm=T)) %>%
+  ungroup() %>% spread(day, atraso_med)
 
 
-#Crie uma tabela em que cada linha é um dia e cada coluna é o atraso médio de partida por mês.
+#gather
+#Transforme-as em um formato tidy.
+flights %>%
+  group_by(month, day) %>%
+  summarise(atraso_med = mean
+(dep_delay,na.rm=T)) %>%
+  ungroup() %>% spread(month, atraso_med) %>%
+  gather(mes,delay,2:13) %>% tbl_df()
 
-pnud_muni %>% summarise(media = mean(idhm), dp = sd(idhm))
+flights %>%
+  group_by(hour, day) %>%
+  summarise(atraso_med = mean
+(dep_delay,na.rm=T)) %>%
+  ungroup() %>% spread(day, atraso_med) %>%
+  gather(day, delay, 2:32)
+
+
+
+
 
 
 
