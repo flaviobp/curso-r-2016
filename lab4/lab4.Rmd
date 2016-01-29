@@ -28,7 +28,86 @@ ggplot(data = diamonds, aes(x = price, y = carat)) +
 #4. Quais são os aspectos estéticos (aesthetics) exigidos (obrigatórios) da função geom_histogram()?
 # geom_histogram segue mesmo aesthetics de geom_bar, que tem como obrigatório X.
 
-#5Faça um histograma da variável preço. Modifique a cor das barras de forma que elas não pareçam grudadas umas nas outras.
+#5. Faça um histograma da variável preço. Modifique a cor das barras de forma que elas não pareçam grudadas umas nas outras.
+ggplot(diamonds, aes(x = price)) + geom_histogram(colour = "blue", fill="green")
 
+#6. Utilize a função geom_density() para adicionar ao gráfico anterior uma estimativa suavizada da densidade.
+ggplot(diamonds, aes(x = price)) + geom_histogram(aes(y=..density..),colour = "blue", fill="green")+geom_density(alpha=.5, fill="black")
+
+
+# geom_boxplot
+# 7. Quais são os aspectos estéticos (aesthetics) exigidos (obrigatórios) da função geom_boxplot()?
+#lower middle upper x ymax ymin
+
+
+
+# 8. Faça boxplots da variável preço coloridos de acordo com a variável corte (cut).
+ggplot(data = diamonds) +
+      geom_boxplot(aes(x = as.character(cut), y = price, fill = as.character(cut)))
+
+
+# 9. Substitua as cores padrões e remova a legenda do gráfico anterior. (Dica: use a função scale_color_manual)
+ggplot(data = diamonds,aes(x = as.character(cut), y = price, fill = as.character(cut))) +
+  geom_boxplot()+
+  scale_fill_manual(name = "Indice", values = c("blue", "red","darkblue","yellow","green")) +
+  labs(x="Corte",y="Preço")
+
+# geom_bar
+# 10. Quais são os aspectos estéticos (aesthetics) exigidos (obrigatórios) da função geom_bar()?
+# X 
+
+# 11. Faça um gráfico de barras do número de diamantes em cada categoria da variável cor (color).
+ggplot(diamonds, aes(x = as.character(color))) + geom_bar()
+
+#Outra base de dados
+# 12. Faça um gráfico de dispersão do número de desempregados (eixo x) pelo tempo médio de desemprego (eixo y). Não se esqueça de alterar o label dos eixos.
+cor(economics$unemploy, economics$uempmed)
+ggplot(data = economics, aes(x = unemploy, y = uempmed)) +
+  geom_point() + labs(x = "Desempregado", y = "Tempo médio de desemprego")
+
+# 13. Faça o mesmo gráfico do exercício anterior, no entanto, os pontos devem ter cores diferentes para cada ano, seguindo uma escala contínua.
+#
+# Dica: utilize a função year do pacote lubridate para saber o ano de cada data.
+ggplot(data = economics, aes(x = unemploy, y = uempmed)) +
+  geom_point(alpha = 0.1, aes(colour = year(date))) + 
+  labs(x = "Desempregado", y = "Tempo médio de desemprego")
+
+# 14. Faça um gráfico de linha do número de desempregados (eixo y) e a data (eixo x).
+ggplot(economics, aes(x = date, y = unemploy)) + geom_line()
+
+# 15. Repita o gráfico anterior, no entanto desta vez a periodicidade deve ser anual e o valor apresentado no eixo y deve ser o número médio de desempregados.
+# 
+# Dica: Agregue a base usando o dplyr antes.
+economics %>%
+  mutate(date =  year(date)) %>%
+  group_by(date) %>%
+  summarise(unemploy = mean(unemploy)) %>%
+ggplot(aes(x = date, y = unemploy)) + geom_line() +
+  labs(x = "Ano", y = "Número médio de desempregados")
+
+# 16 Tente reproduzir o seguinte gráfico:
+# 
+# a linha é a mediana de desempregados por ano
+# o limite inferior da banda é o quantil de 1% do número de desempregados
+# o limtie superior da banda é o quantil de 99% do número de desempregados
+# Dica: utilize a função geom_ribbon para fazer a banda envolta da linha.
+economics %>%
+  mutate(date =  year(date)) %>%
+  group_by(date) %>%
+  summarise(mdesem = median(unemploy), linf = quantile(unemploy, c(.01)), lsup = quantile(unemploy, c(.99))) %>%
+ggplot(aes(x = date, y = mdesem)) + geom_line() +
+  geom_ribbon(aes(ymin=linf, ymax=lsup, x=date, colour = "Banda"), alpha = 0.3) +
+  labs(x = "Ano", y = "Número de Desempregados")
+
+#17. Afim de comparar a evolução no tempo dos índices pce, psaver e taxa de desemprego (unemploy/pop), tente refazer o seguinte gráfico.
+#Você precisará deixar os seus dados no formato long usando a função gather do tidyr.
+economics %>%
+  mutate(tx_desemprego = unemploy/pop) %>%
+  select(date, pce, psavert, tx_desemprego) %>%
+  gather(indice, valor, -date) %>%
+  group_by(indice) %>%
+  ggplot(aes(x = date, y = valor, colour = indice)) +
+  geom_line() +
+  facet_grid(indice~., scales = "free")
 ```
 
