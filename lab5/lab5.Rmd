@@ -1,0 +1,163 @@
+---
+title: "Laboratório 5"
+author: "Curso R de Verão 2016"
+date: "29 de janeiro de 2016"
+output: html_document
+---
+
+```{r}
+
+
+#install.packages("jpeg")
+library(ggplot2)
+library(magrittr)
+library(tidyr)
+library(dplyr)
+library(jpeg)
+library(tree)
+
+
+#a) TAB abre autocomplete dos diretorios
+img <- readJPEG('images/purple_wave.jpg')
+
+#b) 
+img_dim <- dim(img)
+
+
+
+# RGB para data.frame
+img_df <- data.frame(
+  x = rep(1:img_dim[2], each = img_dim[1]),
+  y = rep(img_dim[1]:1, img_dim[2]),
+  r = as.vector(img[,,1]),
+  g = as.vector(img[,,2]),
+  b = as.vector(img[,,3])
+) %>%
+  mutate(cor = rgb(r, g, b),
+         id = 1:n())
+
+
+
+# para reprodução
+set.seed(1) 
+
+# Parte 1) x, y, r, g
+img_df_parte1 <- img_df %>% 
+  sample_frac(3/5) %>% # separando 3/5 do banco - amostra fracao da base aleatorio
+  mutate(b_backup = b, # backup do azul original
+         b = 0, # retirando o azul da imagem
+         cor = rgb(r, g, b)) # cor da imagem sem o azul
+
+ 7560*(3/5)
+
+# Parte 2) x, y, r, g, b
+img_df_parte2 <- img_df %>% filter(!id%in%img_df_parte1$id) # filtra as linhas que estão na Parte 1
+
+
+ggplot(data = img_df_parte1, aes(x = x, y = y)) + 
+  geom_point(colour = img_df_parte1$cor) +
+  labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
+  coord_fixed(ratio = 1) +
+  theme_bw()
+
+
+# Apenas o azul da imagem
+ggplot(data = img_df_parte2, aes(x = x, y = y)) + 
+  geom_point(colour = img_df_parte2$cor) +
+  labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
+  coord_fixed(ratio = 1) +
+  theme_bw()
+
+
+modelo x y r g predict b
+
+aplicar na outra imagem que nao tem o b e recuperar a imagem
+
+
+
+# sortear 500 linhas sem reposicao
+img_df_amostra <- img_df %>% 
+  sample_n(500,replace = FALSE)
+
+
+
+#Ex 1
+cor(img_df_amostra)
+str(img_df_amostra)
+
+cor(img_df_amostra %>%
+      select(-cor,-id))%>%
+      round(2)
+
+
+pairs(img_df_amostra %>%
+      select(-cor,-id))
+
+
+#variavel vermelha esplica a azul
+#regressao linear e arvore de decisao, fazer predicto
+
+
+
+# Exercício 2: Modelo de Regressão Linear
+# Com base na análise descritiva do exercício anterior, proponha um preditor para b e traduza para o R como uma fórmula;
+# Ajuste uma regressão linear utilizando a fórmula proposta e a função lm();
+# LEMBRETE: fórmulas de modelos deixam a resposta à esquerda do ~ e as preditivas/explicativas à direita.
+
+
+
+ajuste_img_df_lm <- lm(b~r, data=img_df_amostra)
+#y = a +bx
+b <- -0.006754 + 0.996303*r    
+
+coeficientes_img_df <- coef(ajuste_img_df_lm)
+
+ggplot(img_df_amostra)+
+  geom_point(aes(x=r, y =b))+
+  geom_abline(intercept =  coeficientes_img_df[1], slope=coeficientes_img_df[2])
+
+
+#1. MODELE
+#LM
+modelo_lm <- lm(b~r, data = img_df_parte2)
+
+#TREE
+modelo_tree <- tree(b~r, data = img_df_parte2)
+
+
+#2. PREDICT
+ predito_lm <- predict(modelo_lm, img_df_parte1)
+ predito_tree <- predict(modelo_tree, img_df_parte1)
+
+
+#1,modele modelo_lm |modelo_tree usar img_d_parte2
+#2
+# predito_lm <- predict(modelo_lm, img_df_parte1)
+# predito_tree <- predict(modelo_tree, img_df_parte1)
+
+#3 
+#adicionar predito_XX com coluna da base img_df_parte1
+ #abs
+ predito_lm <- abs(predito_lm)
+ predito_tree <- abs(predito_tree)
+ 
+ #LM
+ img_df_parte1$b <- predito_lm
+ 
+ img_df_parte1 %>%
+   mutate(cor = rgb(r, g, b)) %>%
+  ggplot(data = ., aes(x = x, y = y)) + 
+  geom_point(colour = img_df_parte1$cor) +
+  labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
+  coord_fixed(ratio = 1) +
+  theme_bw()
+ 
+
+#4. comparar com a coluna de back_up
+ 
+#erro quadratico que cada ta cometendo
+RMSE = E (y - ^y)2 = mean(b_backup_predict_xx)2
+ 
+
+```
+

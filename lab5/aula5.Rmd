@@ -1,0 +1,378 @@
+---
+title: "Aula 5"
+author: "Curso R de Verão 2016"
+date: "29 de janeiro de 2016"
+output: html_document
+---
+
+```{r}
+#Modelagem de dados
+
+library(magrittr)
+library(ggplot2)
+
+
+mtcars
+
+Y ~ Normal < = > mpg ~ wt
+
+#qto o carro gasta pelo seu peso
+ajuste_lm <- lm(mpg~wt, data=mtcars)
+
+
+ajuste_lm
+
+coeficientes <- coef(ajuste_lm)
+
+
+ggplot(mtcars)+
+  geom_point(aes(x=wt, y =mpg))+
+  geom_abline(intercept =  coeficientes[1], slope=coeficientes[2])
+
+
+y = a +bx
+mpg = 37.728 - 5.3wt    
+
+
+summary(ajuste_lm)
+
+ summary(ajuste_lm)
+
+Call:
+lm(formula = mpg ~ wt, data = mtcars)
+
+Residuals:(aproximação exata valores = 0 - diferença entre observado e estimado)
+    Min      1Q  Median      3Q     Max 
+-4.5432 -2.3647 -0.1252  1.4096  6.8727 
+
+Coefficients:             (erro padrao)     Testando se é diferente de 0 estat
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  37.2851     1.8776  19.858  < 2e-16 ***
+wt           -5.3445     0.5591  -9.559 1.29e-10 ***
+---
+Signif. codes:  #Parametros
+  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+  
+Residual standard error: 3.046 on 30 degrees of freedom
+#(1  - perfeito , 0 - aleatorio)
+#n° da correlacao ao quadrado
+Multiple R-squared:  0.7528,	
+#mais consumido
+Adjusted R-squared:  0.7446 
+F-statistic: 91.38 on 1 and 30 DF,  p-value: 1.294e-10
+
+
+
+cor(mtcars$mpg, mtcars$wt)
+cor(mtcars$mpg, mtcars$wt)^2
+
+
+#plot
+#ggplot mais indicada para apresentacao de graficos
+#plot util, pq plot em algum objeto solta graficos uteis ao objeto
+
+#colocar 4 graficos na mesma figura
+par(mfrow = c(2,2))
+plot(ajuste_lm)
+
+
+
+#linha vermelha deveria ficar reta - melhor ajuste
+
+
+#anova - consegue testar conjuto de parametros
+
+
+# modelo com wt e cyl
+#explicar o gasto do carro pelo n° de cylnds
+ajuste_lm2 <- lm(mpg ~ wt + cyl, data = mtcars)
+anova(ajuste_lm2)
+
+
+mtcars["Fiat 128",]
+
+
+#id outliers
+#devolve residuals
+res <- residuals(ajuste_lm)
+
+# guardar nome das linhas
+mtcars %>% 
+  add_rownames %>%   
+  filter(res %>% abs > 6)
+
+mtcars %>% 
+  add_rownames %>%   
+  filter(res %>% abs > 6)
+
+
+mtcars_com_outliers < mtcars %>%
+  add_rownames %>%
+  mutate(outlier = ifelse(res %>% abs >6, rowname, NA))
+
+
+
+
+
+##############
+#stepwise - euristica que t da o bom, nao o otimo
+# alg q ajuda reduzir o modelo - varias lm
+ajuste_lm_completo <- lm(mpg ~ ., data = mtcars)
+
+# modelo forward
+step(ajuste_lm_completo, direction = "forward")
+
+# modelo backward
+step(ajuste_lm_completo, direction = "backward")
+
+# modelo both
+step(ajuste_lm_completo, direction = "both")
+
+
+
+
+
+
+
+
+
+#linearHypotesis
+
+
+#generalizada - tira n coloca outras distr
+#regressao logistica ( regrassao binomil dicotomia)
+
+#Homocedasticidade   - 
+Homo dispersos, distancia aproximada entre as aproximacoes
+
+
+ajuste_glm <- glm(resposta ~ explicativas, 
+                  data = dados, 
+                  family = distribuicao)
+
+
+
+ajuste_gama <- glm(Y ~ X + I(X^2) + Z, 
+                   data = dados, 
+                   family = Gamma(link = "log"))
+
+
+
+
+#Explicar a variavel am - transmissao aut ou man
+# a partir do peso
+# Regressão logistica: Ligação logit
+#family - modelar com a familia binomial
+ajuste_glm <- glm(am ~ wt, data = mtcars, family = binomial)
+table(mtcars$am, predict(ajuste_glm, type = 'response') > 0.5)
+
+parametro 0.5 arbitrario, criterio de decisao
+
+acima de 50% provavel de ser automatico
+
+#predict - retorna as prob de ser automatico
+#de acordo com o modelo de ele ser automatico, baseado no peso
+
+
+    FALSE TRUE
+  0    18    1
+  1     2   11
+  
+  
+  #
+  18 n auto aut
+  11 auto e foram classificados como auto
+  
+  #este modelo apenas 3 casos de erro, peso em relacao automatico
+
+predict(ajuste_glm, type = 'response')
+
+
+summary(ajuste_glm)
+
+Call:
+glm(formula = am ~ wt, family = binomial, data = mtcars)
+
+Deviance Residuals: 
+     Min        1Q    Median        3Q       Max  
+-2.11400  -0.53738  -0.08811   0.26055   2.19931  
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)   
+(Intercept)   12.040      4.510   2.670  0.00759 **
+
+summary(ajuste_glm)
+#regressao logistica
+log(p/1-p) = 12 -4wt (predict)
+
+
+
+P = e^(12-4wt)
+    ----
+    1+e^(12-4wt)
+
+
+
+
+
+#Árvore de Decisão - probalistica decisao conforme as probs
+
+library(tree)
+install.packages("tree")
+
+
+library(tree)
+
+#ajustar uma arvore resposta, criou factor em am,
+#factor - guarda o rotulo para o numero
+#explicado pelo peso
+ajuste_tree <- tree(factor(am) ~ wt, data = mtcars)
+summary(ajuste_tree)
+
+
+Classification tree:
+tree(formula = factor(am) ~ wt, data = mtcars)
+Number of terminal nodes:  5 
+Residual mean deviance:  0.4955 = 13.38 / 27 
+Misclassification error rate: 0.09375 = 3 / 32 
+
+#volta para um grafico
+par(mfrow = c(1,1))
+
+
+
+
+
+
+
+plot(ajuste_tree)
+
+
+#escreve textos no grafico
+plot(ajuste_tree)
+text(ajuste_tree, pretty = 0)
+
+1 - manual
+
+
+#colocar a prob abaixo
+ajuste_tree <- tree(am ~ wt, data = mtcars)
+summary(ajuste_tree)
+
+plot(ajuste_tree)
+text(ajuste_tree, pretty = 0)
+
+
+table(mtcars$am, predict(ajuste_tree)[,"1"] > 0.5)
+
+
+#Cross-validation - parecido com stepwise para arv de decisao
+#Devolve o erro na pratica, erro de predicao, nao de ajuste, prevendo algo que nao viu
+
+set.seed(123)
+cv_tree <- cv.tree(ajuste_tree)
+plot(cv_tree)
+
+
+#grafico que mostra qtos ramos, folhas t da melhor arvore, arvore otima
+#neste grafico melhor arvore duas folhas
+
+
+
+#prune.tree - podar arvore de acordo com ajuste q da melhor arvore
+
+# seleciona a arvoore com 2 nós
+melhor_tree <- prune.tree(ajuste_tree, best = 2)
+# Grafico que representa a arvore `melhor_tree`
+plot(melhor_tree)
+text(melhor_tree, pretty = 0)
+
+
+
+
+
+#cross-validation - ajuste em um, testa no outro
+#caret gam boot -
+
+
+ cv_tree
+$size
+[1] 3 2 1
+
+$dev
+[1] 4.085793 4.235117 8.502272
+
+$k
+[1]      -Inf 0.2857143 5.0600198
+
+$method
+[1] "deviance"
+
+attr(,"class")
+[1] "prune"         "tree.sequence"
+
+
+
+
+
+
+
+cv_tree$size[which.min(cv_tree$dev)]
+
+
+
+plot(cv_tree)
+1 folha erro alto
+
+2 folhas erra menos
+
+
+
+
+
+#sobre o lab 5 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
