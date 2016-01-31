@@ -48,7 +48,7 @@ img_df_parte1 <- img_df %>%
          b = 0, # retirando o azul da imagem
          cor = rgb(r, g, b)) # cor da imagem sem o azul
 
- 7560*(3/5)
+# 7560*(3/5) - linhas selecionadas selecionados
 
 # Parte 2) x, y, r, g, b
 img_df_parte2 <- img_df %>% filter(!id%in%img_df_parte1$id) # filtra as linhas que estão na Parte 1
@@ -69,12 +69,7 @@ ggplot(data = img_df_parte2, aes(x = x, y = y)) +
   theme_bw()
 
 
-modelo x y r g predict b
-
-aplicar na outra imagem que nao tem o b e recuperar a imagem
-
-
-
+#Analise IMG 1
 # sortear 500 linhas sem reposicao
 img_df_amostra <- img_df %>% 
   sample_n(500,replace = FALSE)
@@ -82,8 +77,8 @@ img_df_amostra <- img_df %>%
 
 
 #Ex 1
-cor(img_df_amostra)
-str(img_df_amostra)
+# cor(img_df_amostra)
+# str(img_df_amostra)
 
 cor(img_df_amostra %>%
       select(-cor,-id))%>%
@@ -145,19 +140,118 @@ modelo_tree <- tree(b~r, data = img_df_parte2)
  img_df_parte1$b <- predito_lm
  
  img_df_parte1 %>%
-   mutate(cor = rgb(r, g, b)) %>%
-  ggplot(data = ., aes(x = x, y = y)) + 
-  geom_point(colour = img_df_parte1$cor) +
-  labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
-  coord_fixed(ratio = 1) +
-  theme_bw()
- 
+   mutate(cor = rgb(r, g, b)) %>%{
+        ggplot(data = ., aes(x = x, y = y)) + 
+        geom_point(colour = .$cor) +
+        labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
+        coord_fixed(ratio = 1) +
+        theme_bw()
+   }
 
 #4. comparar com a coluna de back_up
  
 #erro quadratico que cada ta cometendo
-RMSE = E (y - ^y)2 = mean(b_backup_predict_xx)2
+#RMSE = E (y - ^y)2 = mean(b_backup_predict_xx)2
  
 
+ 
+ 
+ 
+#ANALISE IMG2
+img2 <- readJPEG('images/xadrez_colorido.jpg')
+
+#b) 
+img2_dim <- dim(img2)
+
+# RGB para data.frame
+img2_df <- data.frame(
+  x = rep(1:img2_dim[2], each = img2_dim[1]),
+  y = rep(img2_dim[1]:1, img2_dim[2]),
+  r = as.vector(img2[,,1]),
+  g = as.vector(img2[,,2]),
+  b = as.vector(img2[,,3])
+) %>%
+  mutate(cor = rgb(r, g, b),
+         id = 1:n())
+
+# para reprodução
+set.seed(1) 
+
+# Parte 1) x, y, r, g
+img2_df_parte1 <- img2_df %>% 
+  sample_frac(3/5) %>% # separando 3/5 do banco - amostra fracao da base aleatorio
+  mutate(b_backup = b, # backup do azul original
+         b = 0, # retirando o azul da imagem
+         cor = rgb(r, g, b)) # cor da imagem sem o azul
+
+# 7560*(3/5) - linhas selecionadas selecionados
+
+# Parte 2) x, y, r, g, b
+img2_df_parte2 <- img2_df %>% filter(!id%in%img2_df_parte1$id) # filtra as linhas que estão na Parte 1
+
+ggplot(data = img2_df_parte1, aes(x = x, y = y)) + 
+  geom_point(colour = img2_df_parte1$cor) +
+  labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
+  coord_fixed(ratio = 1) +
+  theme_bw()
+
+
+# Apenas o azul da imagem
+ggplot(data = img2_df_parte2, aes(x = x, y = y)) + 
+  geom_point(colour = img2_df_parte2$cor) +
+  labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
+  coord_fixed(ratio = 1) +
+  theme_bw()
+
+
+
+
+#Analise IMG 2
+# sortear 500 linhas sem reposicao
+img2_df_amostra <- img2_df %>% 
+  sample_n(500,replace = FALSE)
+
+
+
+#Ex 1
+# cor(img_df_amostra)
+# str(img_df_amostra)
+
+cor(img2_df_amostra %>%
+      select(-cor,-id))%>%
+      round(2)
+
+
+pairs(img2_df_amostra %>%
+      select(-cor,-id))
+
+modelo2_lm <- lm(b~r, data = img2_df_parte2)
+modelo2_tree <- tree(b~r+g+x+y, data = img2_df_parte2)
+
+predito2_lm <- predict(modelo_lm, img2_df_parte1)
+predito2_tree <- predict(modelo2_tree, img2_df_parte1)
+
+predito2_lm <- abs(predito2_lm)
+predito2_tree <- abs(predito2_tree)
+
+ 
+
+ img2_df_parte1$b <- predito2_lm
+ img2_df_parte1$b <- predito2_tree
+ 
+  img2_df_parte1 %>%
+   mutate(cor = rgb(r, g, b)) %>%{
+        ggplot(data = ., aes(x = x, y = y)) + 
+        geom_point(colour = .$cor) +
+        labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
+        coord_fixed(ratio = 1) +
+        theme_bw()
+   }
+
+ 
+ 
+ 
+ 
+ 
 ```
 
