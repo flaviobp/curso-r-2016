@@ -17,13 +17,13 @@ library(jpeg)
 library(tree)
 
 
-#a) TAB abre autocomplete dos diretorios
+#*********** purple_wave.jpg *****************
+# a) carrega uma imagem jpeg no R 
 img <- readJPEG('images/purple_wave.jpg')
 
-#b) 
+# b) transforma o array da imagem em data.frame com infos de posicao (x,y) e cor (r,g,b)
+# dimensões da imagem
 img_dim <- dim(img)
-
-
 
 # RGB para data.frame
 img_df <- data.frame(
@@ -36,8 +36,6 @@ img_df <- data.frame(
   mutate(cor = rgb(r, g, b),
          id = 1:n())
 
-
-
 # para reprodução
 set.seed(1) 
 
@@ -48,15 +46,13 @@ img_df_parte1 <- img_df %>%
          b = 0, # retirando o azul da imagem
          cor = rgb(r, g, b)) # cor da imagem sem o azul
 
-# 7560*(3/5) - linhas selecionadas selecionados
-
 # Parte 2) x, y, r, g, b
 img_df_parte2 <- img_df %>% filter(!id%in%img_df_parte1$id) # filtra as linhas que estão na Parte 1
 
-
+# Imagem sem o azul
 ggplot(data = img_df_parte1, aes(x = x, y = y)) + 
   geom_point(colour = img_df_parte1$cor) +
-  labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
+  labs(x = "x", y = "y", title = "3/5 Imagem sem B (azul)") +
   coord_fixed(ratio = 1) +
   theme_bw()
 
@@ -64,34 +60,22 @@ ggplot(data = img_df_parte1, aes(x = x, y = y)) +
 # Apenas o azul da imagem
 ggplot(data = img_df_parte2, aes(x = x, y = y)) + 
   geom_point(colour = img_df_parte2$cor) +
-  labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
+  labs(x = "x", y = "y", title = "2/5 Imagem com B (azul)") +
   coord_fixed(ratio = 1) +
   theme_bw()
 
+#Exercício 1: Descritiva
 
-#Analise IMG 1
 # sortear 500 linhas sem reposicao
 img_df_amostra <- img_df %>% 
   sample_n(500,replace = FALSE)
-
-
-
-#Ex 1
-# cor(img_df_amostra)
-# str(img_df_amostra)
 
 cor(img_df_amostra %>%
       select(-cor,-id))%>%
       round(2)
 
-
 pairs(img_df_amostra %>%
       select(-cor,-id))
-
-
-#variavel vermelha esplica a azul
-#regressao linear e arvore de decisao, fazer predicto
-
 
 
 # Exercício 2: Modelo de Regressão Linear
@@ -99,30 +83,124 @@ pairs(img_df_amostra %>%
 # Ajuste uma regressão linear utilizando a fórmula proposta e a função lm();
 # LEMBRETE: fórmulas de modelos deixam a resposta à esquerda do ~ e as preditivas/explicativas à direita.
 
-
+#variavel vermelha explica a azul
 
 ajuste_img_df_lm <- lm(b~r, data=img_df_amostra)
-#y = a +bx
-b <- -0.006754 + 0.996303*r    
-
 coeficientes_img_df <- coef(ajuste_img_df_lm)
 
 ggplot(img_df_amostra)+
   geom_point(aes(x=r, y =b))+
   geom_abline(intercept =  coeficientes_img_df[1], slope=coeficientes_img_df[2])
+#b <- -0.006754 + 0.996303*r    
 
 
-#1. MODELE
-#LM
+#MODELo LM
 modelo_lm <- lm(b~r, data = img_df_parte2)
+predito_lm <- predict(modelo_lm, img_df_parte1)
 
-#TREE
+
+# Exercício 3: Modelo de Árvore de Decisão
+# Com base na análise descritiva do exercício anterior, escolha as variáveis para predizer b e passe como uma fórmula à função.
+# 
+# Ajuste uma árvore de decisão por meio da função tree() do pacote tree, passando a fórmula com as variáveis escolhidas.
+
+#MODELO TREE
 modelo_tree <- tree(b~r, data = img_df_parte2)
+predito_tree <- predict(modelo_tree, img_df_parte1)
 
 
+
+# Exercício 4: Comparação
+# Calcule o erro de predição.
+rmse_lm <- mean((img_df_parte1$b_backup-predito_lm)^2)
+rmse_tree <- mean((img_df_parte1$b_backup-predito_tree)^2)
+
+#rmse_lm  - menor erro
+
+
+# Desenhe o original e o predito.
+
+#original
+ img_df_parte1 %>%{
+        ggplot(data = ., aes(x = x, y = y)) + 
+        geom_point(colour = .$cor) +
+        labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
+        coord_fixed(ratio = 1) +
+        theme_bw()
+   }
+
+#predito_lm
+ img_df_parte1 %>%
+ mutate(b = abs(predito_lm)) %>%
+ mutate(cor = rgb(r, g, b)) %>%{
+      ggplot(data = ., aes(x = x, y = y)) + 
+      geom_point(colour = .$cor) +
+      labs(x = "x", y = "y", title = "Imagem predito_lm B (azul)") +
+      coord_fixed(ratio = 1) +
+      theme_bw()
+ }
+
+#predito_tree
+ img_df_parte1 %>%
+ mutate(b = abs(predito_tree)) %>%
+ mutate(cor = rgb(r, g, b)) %>%{
+      ggplot(data = ., aes(x = x, y = y)) + 
+      geom_point(colour = .$cor) +
+      labs(x = "x", y = "y", title = "Imagem predito_tree B (azul)") +
+      coord_fixed(ratio = 1) +
+      theme_bw()
+ }
+
+
+# Qual ficou melhor?
+# O modelo com regressao linear
+ 
+# Você acha que o padrão da imagem (transições suaves de cor) influenciou neste resultado? Por quê?
+# Sim, como a transição de cores ocorre com roxo e preto, a composição das cores facilitou a utilização da regressao linear para atingir um melhor resultado. Logo, a transição do roxo que é composto basicamente pela combinação de tonalidades em vermelho e azul, facilitou uma lm entre as duas cores.
+
+
+
+# Exercício 5: Outra Imagem
+# Repita os exercícios de 1 a 4, mas agora para a imagem xadrez_colorido.jpg.
+# Quanto ao desempenho para recuperar o azul de imagens, teve uma técnica melhor?
+ 
+img_xadrez <- readJPEG('images/xadrez_colorido.jpg')
+img_xadrez_dim <- dim(img_xadrez) 
+ 
+img_xadrez_df <- data.frame(
+  x = rep(1:img_xadrez_dim[2], each = img_xadrez_dim[1]),
+  y = rep(img_xadrez_dim[1]:1, img_xadrez_dim[2]),
+  r = as.vector(img_xadrez[,,1]),
+  g = as.vector(img_xadrez[,,2]),
+  b = as.vector(img_xadrez[,,3])
+) %>%
+  mutate(cor = rgb(r, g, b),
+         id = 1:n())
+ 
+set.seed(1) 
+
+# Parte 1) x, y, r, g
+img_xadrez_df_parte1 <- img_xadrez_df %>% 
+  sample_frac(3/5) %>% # separando 3/5 do banco - amostra fracao da base aleatorio
+  mutate(b_backup = b, # backup do azul original
+         b = 0, # retirando o azul da imagem
+         cor = rgb(r, g, b)) # cor da imagem sem o azul
+
+# Parte 2) x, y, r, g, b
+img_xadrez_df_parte2 <- img_xadrez_df %>% filter(!id%in%img_xadrez_df_parte1$id) # filtra as linhas que estão na Parte 1
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 #2. PREDICT
- predito_lm <- predict(modelo_lm, img_df_parte1)
- predito_tree <- predict(modelo_tree, img_df_parte1)
+
+
 
 
 #1,modele modelo_lm |modelo_tree usar img_d_parte2
@@ -252,6 +330,6 @@ predito2_tree <- abs(predito2_tree)
  
  
  
- 
+#mean((b_backup-predict_xx)^2)
 ```
 

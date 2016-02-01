@@ -1,0 +1,67 @@
+---
+title: "Aula 6"
+author: "Curso R de Verão 2016"
+date: "1 de fevereiro de 2016"
+output: html_document
+---
+
+```{r}
+
+#BigData
+#Nao cabe na memoria os dados
+#Dados precisam ser armazenados em disco - pontos de transicao
+#obs: memoria nao possui indices
+#Dados a serem guardados em muitos computadores
+#complexidade i/o extremo
+#Acredita que e impossivel ter a trinca de armazenados memoria, disco e distribuido
+#R na vantagem para memoria
+#Hadoop centenas de computadores, mas lento em uma maquina nao vale a pena
+#Nao acredita q um unico sistema resolva problemas de BD
+
+#Pontos de transicao
+
+
+
+#Classes de problemas
+#1(90%)°Vc acha que e BD, mas e small, apenas subset dos dados e o interesse
+# SMALL
+#MongoDB, arquivos semi-estruturados
+#Dplyr lazing avalition - processamento distribuido
+
+#2(9%)° Mesmo com subset nao e resolvido em memory, mas pode quebrar em pedacos, computacao paralela usando o hadoop
+
+#3°(1%) - Problemas que realmente nao consegue paralizar e o R nao resolve, sao construidas solucoes proprias para resolver este problema, como sistemas de recomendacao. analise de matriz grande
+
+#Apenas uma pequena parte de problemas que sao BD e poucas empresasa precisam trabalhar com isso
+
+#BD no R
+# R dados em memoria, trabalha com small, logo nao e uma ferramenta de BD
+#Alternativas, usar C, pacote FF q le dados em um disco rigido
+#Retirar amostrar
+#Usar um computador com mais RAM - Ex Amazon aws EC2 - computer S3 banco 
+
+#community AMIs - vdi customizadas 
+
+#LM pode travar computador, guarda uma copia dos dados, nao rode lm em base de 5g
+#Pacotes bigmmemory, biggin so a computacao que precisa
+#biglm - gera um tamanho menor de lm
+
+
+
+#pacote parallel
+#dividir em nucleos
+
+#system.time - avaliar o tempo
+#microbanchmark - avaliar desempenho
+
+
+
+#web scraping
+#httr, xml2, rvest
+#base mongoDB mongolite
+#topicmodels - cluster de textos - MapReduce com contagem de palavras
+
+
+#pacote captcha sage
+```
+

@@ -340,6 +340,10 @@ plot(cv_tree)
 
 
 
+#a) TAB abre autocomplete dos diretorios
+img <- readJPEG('images/purple_wave.jpg')
+
+# 7560*(3/5) - linhas selecionadas selecionados
 
 
 
@@ -371,8 +375,7 @@ plot(cv_tree)
 
 
 
-
-
+#caret gam boot
 
 ```
 
