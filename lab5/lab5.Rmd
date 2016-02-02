@@ -190,135 +190,54 @@ img_xadrez_df_parte1 <- img_xadrez_df %>%
 img_xadrez_df_parte2 <- img_xadrez_df %>% filter(!id%in%img_xadrez_df_parte1$id) # filtra as linhas que estão na Parte 1
  
  
- 
- 
- 
- 
- 
- 
- 
- 
-#2. PREDICT
-
-
-
-
-#1,modele modelo_lm |modelo_tree usar img_d_parte2
-#2
-# predito_lm <- predict(modelo_lm, img_df_parte1)
-# predito_tree <- predict(modelo_tree, img_df_parte1)
-
-#3 
-#adicionar predito_XX com coluna da base img_df_parte1
- #abs
- predito_lm <- abs(predito_lm)
- predito_tree <- abs(predito_tree)
- 
- #LM
- img_df_parte1$b <- predito_lm
- 
- img_df_parte1 %>%
-   mutate(cor = rgb(r, g, b)) %>%{
-        ggplot(data = ., aes(x = x, y = y)) + 
-        geom_point(colour = .$cor) +
-        labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
-        coord_fixed(ratio = 1) +
-        theme_bw()
-   }
-
-#4. comparar com a coluna de back_up
- 
-#erro quadratico que cada ta cometendo
-#RMSE = E (y - ^y)2 = mean(b_backup_predict_xx)2
- 
-
- 
- 
- 
-#ANALISE IMG2
-img2 <- readJPEG('images/xadrez_colorido.jpg')
-
-#b) 
-img2_dim <- dim(img2)
-
-# RGB para data.frame
-img2_df <- data.frame(
-  x = rep(1:img2_dim[2], each = img2_dim[1]),
-  y = rep(img2_dim[1]:1, img2_dim[2]),
-  r = as.vector(img2[,,1]),
-  g = as.vector(img2[,,2]),
-  b = as.vector(img2[,,3])
-) %>%
-  mutate(cor = rgb(r, g, b),
-         id = 1:n())
-
-# para reprodução
-set.seed(1) 
-
-# Parte 1) x, y, r, g
-img2_df_parte1 <- img2_df %>% 
-  sample_frac(3/5) %>% # separando 3/5 do banco - amostra fracao da base aleatorio
-  mutate(b_backup = b, # backup do azul original
-         b = 0, # retirando o azul da imagem
-         cor = rgb(r, g, b)) # cor da imagem sem o azul
-
-# 7560*(3/5) - linhas selecionadas selecionados
-
-# Parte 2) x, y, r, g, b
-img2_df_parte2 <- img2_df %>% filter(!id%in%img2_df_parte1$id) # filtra as linhas que estão na Parte 1
-
-ggplot(data = img2_df_parte1, aes(x = x, y = y)) + 
-  geom_point(colour = img2_df_parte1$cor) +
-  labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
+# Imagem sem o azul
+ggplot(data = img_xadrez_df_parte1, aes(x = x, y = y)) + 
+  geom_point(colour = img_xadrez_df_parte1$cor) +
+  labs(x = "x", y = "y", title = "3/5 Imagem sem B (azul)") +
   coord_fixed(ratio = 1) +
   theme_bw()
 
 
 # Apenas o azul da imagem
-ggplot(data = img2_df_parte2, aes(x = x, y = y)) + 
-  geom_point(colour = img2_df_parte2$cor) +
-  labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
+ggplot(data = img_xadrez_df_parte2, aes(x = x, y = y)) + 
+  geom_point(colour = img_xadrez_df_parte2$cor) +
+  labs(x = "x", y = "y", title = "2/5 Imagem com B (azul)") +
   coord_fixed(ratio = 1) +
-  theme_bw()
+  theme_bw() 
+ 
 
-
-
-
-#Analise IMG 2
-# sortear 500 linhas sem reposicao
-img2_df_amostra <- img2_df %>% 
+ # sortear 500 linhas sem reposicao
+img_xadrez_df_amostra <- img_xadrez_df %>% 
   sample_n(500,replace = FALSE)
 
-
-
-#Ex 1
-# cor(img_df_amostra)
-# str(img_df_amostra)
-
-cor(img2_df_amostra %>%
+cor(img_xadrez_df_amostra %>%
       select(-cor,-id))%>%
       round(2)
 
-
-pairs(img2_df_amostra %>%
+pairs(img_xadrez_df_amostra %>%
       select(-cor,-id))
-
-modelo2_lm <- lm(b~r, data = img2_df_parte2)
-modelo2_tree <- tree(b~r+g+x+y, data = img2_df_parte2)
-
-predito2_lm <- predict(modelo_lm, img2_df_parte1)
-predito2_tree <- predict(modelo2_tree, img2_df_parte1)
-
-predito2_lm <- abs(predito2_lm)
-predito2_tree <- abs(predito2_tree)
-
  
+#MODELo LM
+modelo_lm_xadrez <- lm(b~r, data = img_xadrez_df_parte2)
+predito_lm_xadrez <- predict(modelo_lm_xadrez, img_xadrez_df_parte1)
 
- img2_df_parte1$b <- predito2_lm
- img2_df_parte1$b <- predito2_tree
- 
-  img2_df_parte1 %>%
-   mutate(cor = rgb(r, g, b)) %>%{
+
+#MODELO TREE
+modelo_tree_xadrez <- tree(b~g+x+y, data = img_xadrez_df_parte2)
+predito_tree_xadrez <- predict(modelo_tree_xadrez, img_xadrez_df_parte1)
+
+
+# Calcule o erro de predição.
+rmse_lm_xadrez <- mean((img_xadrez_df_parte1$b_backup-predito_lm_xadrez)^2)
+rmse_tree_xadrez <- mean((img_xadrez_df_parte1$b_backup-predito_tree_xadrez)^2) 
+
+#Menor erro tree
+
+
+# Desenhe o original e o predito.
+
+#original
+ img_xadrez_df_parte1 %>%{
         ggplot(data = ., aes(x = x, y = y)) + 
         geom_point(colour = .$cor) +
         labs(x = "x", y = "y", title = "Imagem sem B (azul)") +
@@ -326,10 +245,45 @@ predito2_tree <- abs(predito2_tree)
         theme_bw()
    }
 
+#predito_lm
+ img_xadrez_df_parte1 %>%
+ mutate(b = abs(predito_lm_xadrez)) %>%
+ mutate(cor = rgb(r, g, b)) %>%{
+      ggplot(data = ., aes(x = x, y = y)) + 
+      geom_point(colour = .$cor) +
+      labs(x = "x", y = "y", title = "Imagem predito_lm_xadrez B (azul)") +
+      coord_fixed(ratio = 1) +
+      theme_bw()
+ }
+
+#predito_tree
+ img_xadrez_df_parte1 %>%
+ mutate(b = abs(predito_tree_xadrez)) %>%
+ mutate(cor = rgb(r, g, b)) %>%{
+      ggplot(data = ., aes(x = x, y = y)) + 
+      geom_point(colour = .$cor) +
+      labs(x = "x", y = "y", title = "Imagem predito_tree B (azul)") +
+      coord_fixed(ratio = 1) +
+      theme_bw()
+ }
+
+
+ #Combinando parte 1 predito com parte 2
+ img_xadrez_df_parte1 %>%
+ mutate(b = abs(predito_tree_xadrez)) %>%
+ mutate(cor = rgb(r, g, b)) %>% 
+ subset(select = -b_backup ) %>%
+ rbind(img_xadrez_df_parte2) %>% {
+      ggplot(data = ., aes(x = x, y = y)) + 
+      geom_point(colour = .$cor) +
+      labs(x = "x", y = "y", title = "Imagem predito_tree B (azul)") +
+      coord_fixed(ratio = 1) +
+      theme_bw()
+ }
  
  
+# Qual ficou melhor?
+# O modelo com tree
  
- 
-#mean((b_backup-predict_xx)^2)
 ```
 
