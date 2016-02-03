@@ -1,0 +1,54 @@
+---
+title: "Aula 7"
+author: "Curso R de Verão 2016"
+date: "3 de fevereiro de 2016"
+output: html_document
+---
+
+```{r}
+
+#apresentacao: http://rpubs.com/dfalbel/pacotes <Daniel Falbel>
+#criacao de pacotes
+
+#Livro do Hadley para pacotes http://r-pkgs.had.co.nz/
+#Manual do R para pacotes https://cran.r-project.org/doc/manuals/R-exts.html#Creating-R-packages
+
+# Pré-requisitos
+# Pacotes devtools (ferramenta para criar pacotes), roxygen2 (comentarios em documentacao), testthat(escrever testes), knitr(markdow em html)
+# R e RStudio atualizados (recomenda-se preview version do RStudio)
+
+#PRE-requisitos
+#devtools::install_github('hadley/devtools')
+
+# Instalar versão dev do devtools
+# devtools::install_github('hadley/devtools')
+# No Windows, instalar o Rtools
+# No Mac, instalar o XCode
+# No linux, instalar o pacote de desenvolvimento r-base-dev. No Ubuntu, basta digitar
+# sudo apt-get install r-base-dev
+# Verifique se está tudo certo digitando devtools::has_devel().
+
+
+
+#Criando um pacote
+#Clicar em "Novo projeto" -> "R package" do RStudio
+# Essa é a estrutura mínima para criar um pacote.
+# 
+# Tudo dentro de uma pasta
+# DESCRIPTION: Metadados do pacote.
+# NAMESPACE: Trata das interações do seu pacote com outros pacotes.
+# R/: Pasta onde fica os códigos em R
+# man/: Pasta onde fica a documentação
+# xxx.Rproj: Seu projeto (não é necessário).
+
+
+#ajudar escolher uma licensa
+
+
+#choosealicense.com
+
+
+#colocar imports no description do pacote
+devtools::use_package("dplyr")
+```
+
