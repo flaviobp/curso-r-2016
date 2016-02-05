@@ -1,0 +1,43 @@
+---
+title: "Aula 8"
+author: "Curso R de Verão 2016"
+date: "5 de fevereiro de 2016"
+output: html_document
+---
+
+```{r}
+#Hoje Shiny Extra Feedback lab Shiny
+#Terminar os trabalhos ate dia 25/02
+#errar.how
+#leaflet - mapas js - concorrente do google
+#tableau - ferramenta gerencial
+
+
+
+# dois arquivos ui.r - impressor de html, permuitir q pessoas nao sabe html determinar as coisas - 100% substituvel por html consegue escrever sistema apenas com server.R
+#
+# para substituir server.R e ui.r construir o app.R
+
+#pacote e web conteiner
+#shiny server colocar na web
+
+
+
+#baixa do github
+shiny::runGitHub('abjur/vistemplate', 
+                 subdir='exemplo_01_helloworld', 
+                 display.mode='showcase')
+
+
+shiny::runGitHub('garrettgman/shinyWidgets')
+
+
+
+# Criar um sidebarLayout com dois wellPanel, um dateInput, um checkboxGroup e um textInput.
+# Aprender fluidRow e column.
+
+
+#shinydashboard - estudar
+
+```
+

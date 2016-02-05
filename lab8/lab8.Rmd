@@ -1,0 +1,11 @@
+---
+title: "Laboratório 8"
+author: "Curso R de Verão 2016"
+date: "5 de fevereiro de 2016"
+output: html_document
+---
+
+```{r}
+
+```
+
